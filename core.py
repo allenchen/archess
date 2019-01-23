@@ -37,7 +37,7 @@ class BattleBoard(object):
                 for chess in self.chesses_owned[player]:
                     if timer % chess.attack_rate() == 0:
                         target = chess.select_target(self)
-                        damage = chess.damage()
+                        damage = self.calculate_damage(chess, target)
                         effects_queue += [DamageEffect(chess, target, damage)]
             
             effects_queue = self.apply_effect_priority(effects_queue)
