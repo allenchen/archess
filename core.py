@@ -80,6 +80,9 @@ class BattleBoard(object):
     def opponent(self, player):
         return [p for p in self.players if p.id != player.id][0]
 
+    def opponent_chesses(self, player):
+        return self.chesses_owned[self.opponent(player)]
+
     def __str__(self):
         return str(
             [

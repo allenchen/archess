@@ -12,9 +12,13 @@ class Chess(object):
 
     def bonuses(self, board_state):
         pass
-
+    
     def select_target(self, board_state):
-        pass
+        opponent_chesses = board_state.opponent_chesses(self.owner)
+        if len(opponent_chesses) == 0:
+            return None
+        else:
+            return random.sample(opponent_chesses, 1)[0]
 
     def starting_health(self):
         pass
@@ -39,13 +43,6 @@ class Storm1Chess(Chess):
     def bonuses(self, board_state):
         return []
 
-    def select_target(self, board_state):
-        opponent_chesses = board_state.chesses_owned[board_state.opponent(self.owner)]
-        if len(opponent_chesses) == 0:
-            return None
-        else:
-            return random.sample(opponent_chesses, 1)[0]
-
     def starting_health(self):
         return 25
 
@@ -68,13 +65,6 @@ class Sven1Chess(Chess):
 
     def bonuses(self, board_state):
         return []
-
-    def select_target(self, board_state):
-        opponent_chesses = board_state.chesses_owned[board_state.opponent(self.owner)]
-        if len(opponent_chesses) == 0:
-            return None
-        else:
-            return random.sample(opponent_chesses, 1)[0]
 
     def starting_health(self):
         return 15
