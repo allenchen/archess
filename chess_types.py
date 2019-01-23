@@ -2,7 +2,7 @@ import random
 
 class Chess(object):    
     def __init__(self, id):
-        pass
+        self.id = id
 
     def attack_rate(self):
         pass
