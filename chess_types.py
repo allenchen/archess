@@ -46,9 +46,6 @@ class Storm1Chess(Chess):
     def starting_health(self):
         return 25
 
-    def __hash__(self):
-        return super().__hash__()
-
     def chess_type(self):
         return "Storm1"
 
@@ -68,9 +65,6 @@ class Sven1Chess(Chess):
 
     def starting_health(self):
         return 15
-
-    def __hash__(self):
-        return super().__hash__()
 
     def chess_type(self):
         return "Sven1"
