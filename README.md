@@ -2,7 +2,8 @@
 
 Text based "chesses" game. Run with python3.
 
-```[~/work/archess] $ python3 test.py 
+```
+[~/work/archess] $ python3 test.py 
 [Sven1 | Player1] dealt 2 damage to [Sven1 | Player2].
 [Sven1 | Player2] dealt 2 damage to [Sven1 | Player1].
 [Storm1 | Player2] dealt 10 damage to [Storm1 | Player1].
