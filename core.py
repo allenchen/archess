@@ -24,16 +24,17 @@ class DamageEffect(object):
 
 class BoardPositions(object):
     def __init__(self):
-        self.position_lookup = [[None] * 8] * 8
+        self.position_lookup = [[None for x in range(8)] for x in range(8)]
         self.reverse_position_lookup = {}
 
     # position is a tuple (x,y)
     def add_piece(self, piece, position):
         x, y = position
         if self.position_lookup[x][y]:
+            print(self.position_lookup)
             raise Exception("Can't add a piece at a location where there is already a piece.")
         self.position_lookup[x][y] = piece
-        self.reverse_position_lookup = { piece: position }
+        self.reverse_position_lookup[piece] = position
         return self
 
     def remove_by_position(self, position):
@@ -49,25 +50,26 @@ class BoardPositions(object):
         self.position_lookup[x][y] = None
         return self
 
-    def get_by_position(self, position):
+    def get_piece_at_location(self, position):
         return self.position_lookup[x][y]
 
-    def get_by_piece(self, piece):
+    def get_piece_location(self, piece):
         return self.reverse_position_lookup[piece]
 
-    def get_available_targets(self, position, range):
+    def get_available_targets(self, position, attack_range):
         piece_x, piece_y = position
+
         # add one because it's an exclusive range, and I don't remember and I don't have internet
         # connection to find out what's the inclusive range syntax
-        x_range = range(max(0, piece_x - range), min(8, piece_x + range + 1))
-        y_range = range(max(0, piece_y - range), min(8, piece_y + range + 1))
+        x_range = range(max(0, piece_x - attack_range), min(8, piece_x + attack_range + 1))
+        y_range = range(max(0, piece_y - attack_range), min(8, piece_y + attack_range + 1))
 
         available_targets = []
         
         for x in x_range:
             for y in y_range:
                 if self.position_lookup[x][y]:
-                    available_targets += self.position_lookup[x][y]
+                    available_targets += [self.position_lookup[x][y]]
 
         return available_targets
 
@@ -103,10 +105,28 @@ class BattleBoard(object):
             effects_queue = []
             for player in self.players:
                 for chess in self.chesses_owned[player]:
-                    if timer % chess.attack_rate() == 0:
-                        target = chess.select_target(self)
-                        damage = self.calculate_damage(chess, target)
-                        effects_queue += [DamageEffect(chess, target, damage)]
+                    targets = [ target for target in
+                                self.chesses_positions.get_available_targets(self.chesses_positions.get_piece_location(chess), chess.attack_range())
+                                if target.owner == self.opponent(chess.owner)
+                    ]
+
+                    if len(targets) == 0:
+                        # move thie piece randomly
+                        old_position = self.chesses_positions.get_piece_location(chess)
+                        available_positions = self.chesses_positions.get_available_positions()
+                        if len(available_positions) == 0:
+                            raise Exception("No places for this piece to move!")
+                        
+                        new_position = random.choice(available_positions)
+                        
+                        self.chesses_positions.move_piece(chess, new_position)
+                        print("{} moved from {} to {}".format(chess, old_position, new_position))
+            
+                    else:
+                        if timer % chess.attack_rate() == 0:
+                            target = chess.select_target(self)
+                            damage = self.calculate_damage(chess, target)
+                            effects_queue += [DamageEffect(chess, target, damage)]
             
             effects_queue = self.apply_effect_priority(effects_queue)
 
@@ -117,9 +137,6 @@ class BattleBoard(object):
 
         print("Finished battle!")
         print(self)
-
-    def determine_action(self, piece):
-        
     
     def apply_effect_priority(self, effects):
         return random.sample(effects, len(effects))
