@@ -93,6 +93,18 @@ class BoardPositions(object):
         self.reverse_position_lookup[piece] = new_position
         return self
 
+    def __str__(self):
+        output = ""
+        for y in range(0,8):
+            output += " "
+            for x in range(0,8):
+                if self.position_lookup[x][y]:
+                    output += "[{}]".format(self.position_lookup[x][y].short_name())
+                else:
+                    output += "[   ]"
+            output += "\n"
+        return output
+
 class BattleBoard(object):
     def __init__(self, board_state):
         if board_state is None:
@@ -136,6 +148,7 @@ class BattleBoard(object):
             self.apply_effects(effects_queue)
             
             timer += 1
+            print(self.chesses_positions)
             print("-- Round {} Complete --".format(timer))
 
         print("Finished battle!")
@@ -149,9 +162,7 @@ class BattleBoard(object):
             # Remove health from target
             # Chesses only do damage if they are alive.
             if (self.piece_is_alive(effect.target) and self.piece_is_alive(effect.source)):
-
                 target_health = self.chesses_health[effect.target]
-
                 result_target_health = target_health - effect.amount
 
                 print(effect)
@@ -186,7 +197,7 @@ class BattleBoard(object):
         return self.chesses_owned[self.opponent(player)]
     
     def __str__(self):
-        return str(
+        return str(self.chesses_positions) + str(
             [
                 "{}: {}".format(
                     str(player),

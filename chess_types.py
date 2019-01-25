@@ -22,6 +22,9 @@ class Chess(object):
     def starting_health(self):
         pass
 
+    def short_name(self):
+        return "???"
+    
     def __hash__(self):
         return self.id
 
@@ -58,6 +61,9 @@ class Storm1Chess(Chess):
     def chess_type(self):
         return "Storm1"
 
+    def short_name(self):
+        return "ST{}".format(self.owner.id)
+
 class Sven1Chess(Chess):
     def __init__(self, id, owner):
         self.id = id
@@ -81,6 +87,9 @@ class Sven1Chess(Chess):
     def chess_type(self):
         return "Sven1"
 
+    def short_name(self):
+        return "SV{}".format(self.owner.id)
+
 class Zeus1Chess(Chess):
     def __init__(self, id, owner):
         self.id = id
@@ -103,3 +112,6 @@ class Zeus1Chess(Chess):
 
     def chess_type(self):
         return "Zeus1"
+
+    def short_name(self):
+        return "ZE{}".format(self.owner.id)
