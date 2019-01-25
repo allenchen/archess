@@ -15,6 +15,9 @@ def c_storm(owner):
 def c_sven(owner):
     return CT.Sven1Chess(generate_id(), owner)
 
+def c_zeus(owner):
+    return CT.Zeus1Chess(generate_id(), owner)
+
 def add_piece(board, piece, location):
     board.chesses_owned[piece.owner] += [piece]
     board.chesses_health[piece] = piece.starting_health()
@@ -31,17 +34,14 @@ board1.chesses_owned = {
     player2: []
 }
 
-add_piece(board1, c_storm(player1), (0,0))
-add_piece(board1, c_storm(player1), (0,1))
-add_piece(board1, c_storm(player1), (0,2))
-add_piece(board1, c_storm(player1), (0,3))
+add_piece(board1, c_zeus(player1), (0,0))
 
-add_piece(board1, c_sven(player2), (4,0))
-add_piece(board1, c_sven(player2), (4,1))
-add_piece(board1, c_sven(player2), (4,2))
-add_piece(board1, c_sven(player2), (4,3))
-add_piece(board1, c_sven(player2), (4,4))
+add_piece(board1, c_zeus(player1), (0,2))
 
-print(board1.chesses_positions.reverse_position_lookup)
+add_piece(board1, c_sven(player2), (7,0))
+add_piece(board1, c_sven(player2), (7,1))
+add_piece(board1, c_sven(player2), (7,2))
+add_piece(board1, c_sven(player2), (7,3))
+add_piece(board1, c_sven(player2), (7,4))
 
 board1.battle()

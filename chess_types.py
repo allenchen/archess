@@ -16,12 +16,8 @@ class Chess(object):
     def bonuses(self, board_state):
         pass
     
-    def select_target(self, board_state):
-        opponent_chesses = board_state.opponent_chesses(self.owner)
-        if len(opponent_chesses) == 0:
-            return None
-        else:
-            return random.sample(opponent_chesses, 1)[0]
+    def select_target(self, targets):
+        return random.sample(targets, 1)[0]
 
     def starting_health(self):
         pass
@@ -91,7 +87,7 @@ class Zeus1Chess(Chess):
         self.owner = owner
 
     def attack_rate(self):
-        return 5
+        return 4
 
     def damage(self):
         return 50
@@ -106,4 +102,4 @@ class Zeus1Chess(Chess):
         return 20
 
     def chess_type(self):
-        return "Sven1"
+        return "Zeus1"

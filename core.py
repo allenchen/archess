@@ -64,6 +64,8 @@ class BoardPositions(object):
         x_range = range(max(0, piece_x - attack_range), min(8, piece_x + attack_range + 1))
         y_range = range(max(0, piece_y - attack_range), min(8, piece_y + attack_range + 1))
 
+        #print("Looking for ({}, {})".format(x_range, y_range))
+        
         available_targets = []
         
         for x in x_range:
@@ -124,7 +126,8 @@ class BattleBoard(object):
             
                     else:
                         if timer % chess.attack_rate() == 0:
-                            target = chess.select_target(self)
+                            target = chess.select_target(targets)
+                            #print("P{} dealing damage to P{}".format(self.chesses_positions.get_piece_location(chess), self.chesses_positions.get_piece_location(target)))
                             damage = self.calculate_damage(chess, target)
                             effects_queue += [DamageEffect(chess, target, damage)]
             
@@ -157,6 +160,7 @@ class BattleBoard(object):
                     print("{} died!".format(effect.target))
                     self.chesses_owned[effect.target.owner].remove(effect.target)
                     del self.chesses_health[effect.target]
+                    self.chesses_positions.remove_by_piece(effect.target)
                 else:
                     self.chesses_health[effect.target] = result_target_health
                     
