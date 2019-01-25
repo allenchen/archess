@@ -30,6 +30,8 @@ class BoardPositions(object):
     # position is a tuple (x,y)
     def add_piece(self, piece, position):
         x, y = position
+        if self.position_lookup[x][y]:
+            raise Exception("Can't add a piece at a location where there is already a piece.")
         self.position_lookup[x][y] = piece
         self.reverse_position_lookup = { piece: position }
         return self
@@ -52,7 +54,41 @@ class BoardPositions(object):
 
     def get_by_piece(self, piece):
         return self.reverse_position_lookup[piece]
-    
+
+    def get_available_targets(self, position, range):
+        piece_x, piece_y = position
+        # add one because it's an exclusive range, and I don't remember and I don't have internet
+        # connection to find out what's the inclusive range syntax
+        x_range = range(max(0, piece_x - range), min(8, piece_x + range + 1))
+        y_range = range(max(0, piece_y - range), min(8, piece_y + range + 1))
+
+        available_targets = []
+        
+        for x in x_range:
+            for y in y_range:
+                if self.position_lookup[x][y]:
+                    available_targets += self.position_lookup[x][y]
+
+        return available_targets
+
+    def get_available_positions(self):
+        available_positions = []
+        for x in range(0,8):
+            for y in range(0,8):
+                if not self.position_lookup[x][y]:
+                    available_positions += [(x, y)]
+        return available_positions
+
+    def move_piece(self, piece, new_position):
+        old_x, old_y = self.reverse_position_lookup[piece]
+        new_x, new_y = new_position
+        if self.position_lookup[new_x][new_y]:
+            raise Exception("Can't move a piece to a position where there is already a piece.")
+        self.position_lookup[old_x][old_y] = None
+        self.position_lookup[new_x][new_y] = piece
+        self.reverse_position_lookup[piece] = new_position
+        return self
+
 class BattleBoard(object):
     def __init__(self, board_state):
         if board_state is None:
@@ -82,6 +118,9 @@ class BattleBoard(object):
         print("Finished battle!")
         print(self)
 
+    def determine_action(self, piece):
+        
+    
     def apply_effect_priority(self, effects):
         return random.sample(effects, len(effects))
     
