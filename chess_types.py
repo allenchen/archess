@@ -24,6 +24,9 @@ class Chess(object):
 
     def short_name(self):
         return "???"
+
+    def cost(self):
+        return 100
     
     def __hash__(self):
         return self.id
@@ -43,11 +46,11 @@ class Storm1Chess(Chess):
         return 3
 
     def damage(self):
-        damage_dealt = 3
+        damage_dealt = 1
         
-        crit_roll = random.randint(1,10)
+        crit_roll = random.randint(1,100)
 
-        if crit_roll > 9:
+        if crit_roll > 99:
             damage_dealt = 100
 
         return damage_dealt
@@ -64,19 +67,22 @@ class Storm1Chess(Chess):
     def short_name(self):
         return "ST{}".format(self.owner.id)
 
+    def cost(self):
+        return 5
+
 class Sven1Chess(Chess):
     def __init__(self, id, owner):
         self.id = id
         self.owner = owner
 
     def attack_rate(self):
-        return 1
+        return 3
 
     def attack_range(self):
         return 1
 
     def damage(self):
-        return random.randint(1,4)
+        return random.randint(2,9)
 
     def bonuses(self, board_state):
         return []
@@ -90,13 +96,16 @@ class Sven1Chess(Chess):
     def short_name(self):
         return "SV{}".format(self.owner.id)
 
+    def cost(self):
+        return 3
+
 class Zeus1Chess(Chess):
     def __init__(self, id, owner):
         self.id = id
         self.owner = owner
 
     def attack_rate(self):
-        return 4
+        return 6
 
     def damage(self):
         return 50
@@ -115,3 +124,6 @@ class Zeus1Chess(Chess):
 
     def short_name(self):
         return "ZE{}".format(self.owner.id)
+
+    def cost(self):
+        return 10

@@ -36,7 +36,7 @@ board1.chesses_owned = {
 
 add_piece(board1, c_zeus(player1), (2,0))
 add_piece(board1, c_zeus(player1), (4,0))
-add_piece(board1, c_storm(player1), (6,0))
+add_piece(board1, c_storm(player1), (5,0))
 
 add_piece(board1, c_sven(player2), (0,7))
 add_piece(board1, c_sven(player2), (1,7))

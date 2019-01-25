@@ -8,11 +8,26 @@ class Player(object):
     def __str__(self):
         return "Player{}".format(self.id)
 
-class InventoryBoard(object):
-    def __init__(self, player, chesses):
-        self.player = player
-        self.chesses = chesses
-            
+class GameState(object):
+    def __init__(self, id):
+        self.players = []
+        self.id = id
+        self.chess_inventories = {}
+        self.gold = {}
+        self.chesses_positions = BoardPositions()
+
+    def buy_chess(self, player, chess):
+        pass
+    
+    def sell_chess(self, player, chess):
+        pass
+
+    def move_chess(self, player, chess, new_position):
+        pass
+
+    def add_to_inventory(self, player, chess):
+        pass
+        
 class DamageEffect(object):
     def __init__(self, source, target, amount):
         self.source = source
@@ -22,6 +37,28 @@ class DamageEffect(object):
     def __str__(self):
         return "{} dealt {} damage to {}.".format(self.source, self.amount, self.target)
 
+class MoveEvent(object):
+    def __init__(self, piece, old_position, new_position):
+        self.piece = piece
+        self.old_position = old_position
+        self.new_position = new_position
+        
+    def __str__(self):
+        return "{} moved from {} to {}".format(self.piece, self.old_position, self.new_position)
+
+class DeathEvent(object):
+    def __init__(self, piece):
+        self.piece = piece
+
+    def __str__(self):
+        return "{} died!".format(self.piece)
+    
+class BattleEvent(object):
+    def __init__(self):
+        self.damage_effect = None
+        self.move = None
+        self.death = None
+    
 class BoardPositions(object):
     def __init__(self):
         self.position_lookup = [[None for x in range(8)] for x in range(8)]
@@ -116,7 +153,8 @@ class BattleBoard(object):
     def battle(self):
         timer = 1
         while not self.end_condition():
-
+            events = []
+            
             chesses_to_act = []
             for player in self.players:
                 for chess in self.chesses_owned[player]:
@@ -142,36 +180,42 @@ class BattleBoard(object):
                     new_position = random.choice(available_positions)
                         
                     self.chesses_positions.move_piece(chess, new_position)
-                    print("{} moved from {} to {}".format(chess, old_position, new_position))
+                    events += [MoveEvent(chess, old_position, new_position)]
             
                 else:
                     if timer % chess.attack_rate() == 0:
                         target = chess.select_target(targets)
                         damage = self.calculate_damage(chess, target)
-                        effects_queue = [DamageEffect(chess, target, damage)]
+                        effect = DamageEffect(chess, target, damage)
+                        resulting_events = self.apply_effects([effect])
+                        events += resulting_events
+                        events += [effect]
 
-                        self.apply_effects(effects_queue)
-            
-            timer += 1
+            for event in events:
+                print (event)
+                
             print(self.chesses_positions)
             print(self.print_unit_summary())
+
             print("-- Round {} Complete --".format(timer))
+            
+            timer += 1
 
         print("Finished battle!")
         print(self)
     
     def apply_effects(self, effects):
+        events = []
+        
         for effect in effects:
             # Remove health from target
             # Chesses only do damage if they are alive.
             if (self.piece_is_alive(effect.target) and self.piece_is_alive(effect.source)):
                 target_health = self.chesses_health[effect.target]
                 result_target_health = target_health - effect.amount
-
-                print(effect)
                 
                 if result_target_health <= 0:
-                    print("{} died!".format(effect.target))
+                    events += [DeathEvent(effect.target)]
                     self.chesses_owned[effect.target.owner].remove(effect.target)
                     del self.chesses_health[effect.target]
                     self.chesses_positions.remove_by_piece(effect.target)
@@ -180,6 +224,8 @@ class BattleBoard(object):
                     
             else:
                 print("Tried to apply effect: {} - but could not find source or target.".format(effect))
+
+        return events
                     
     def piece_is_alive(self, piece):
         return (
