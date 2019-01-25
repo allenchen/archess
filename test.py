@@ -1,33 +1,44 @@
 from core import *
 import chess_types as CT
 
+global CURRENT_ID
+CURRENT_ID = 100
+
 def generate_id():
-    return 
+    global CURRENT_ID
+    CURRENT_ID += 1
+    return CURRENT_ID
+
+def c_storm(owner):
+    return CT.Storm1Chess(generate_id(), owner)
+
+def c_sven(owner):
+    return CT.Sven1Chess(generate_id(), owner)
+
+def add_piece(board,piece):
+    board.chesses_owned[piece.owner] += [piece]
+    board.chesses_health[piece] = piece.starting_health()
 
 player1 = Player(1, "Player 1")
 player2 = Player(2, "Player 2")
 
-p1_storm1_chess = CT.Storm1Chess(100, player1)
-p1_storm1_chess2 = CT.Storm1Chess(101, player1)
-p1_sven1_chess = CT.Sven1Chess(102, player1)
-
-p2_storm1_chess = CT.Storm1Chess(200, player2)
-p2_storm1_chess2 = CT.Storm1Chess(201, player2)
-p2_sven1_chess = CT.Sven1Chess(202, player2)
-
 board1 = BattleBoard(None)
 board1.players = [player1, player2]
+
 board1.chesses_owned = {
-    player1: [p1_storm1_chess, p1_storm1_chess2, p1_sven1_chess],
-    player2: [p2_storm1_chess, p2_storm1_chess2, p2_sven1_chess]
+    player1: [],
+    player2: []
 }
-board1.chesses_health = {
-    p1_storm1_chess: p1_storm1_chess.starting_health(),
-    p1_storm1_chess2: p1_storm1_chess2.starting_health(),
-    p1_sven1_chess: p1_sven1_chess.starting_health(),
-    p2_storm1_chess: p2_storm1_chess.starting_health(),
-    p2_storm1_chess2: p2_storm1_chess2.starting_health(),
-    p2_sven1_chess: p2_sven1_chess.starting_health()
-}
+
+add_piece(board1, c_storm(player1))
+add_piece(board1, c_storm(player1))
+add_piece(board1, c_storm(player1))
+add_piece(board1, c_storm(player1))
+
+add_piece(board1, c_sven(player2))
+add_piece(board1, c_sven(player2))
+add_piece(board1, c_sven(player2))
+add_piece(board1, c_sven(player2))
+add_piece(board1, c_sven(player2))
 
 board1.battle()

@@ -10,6 +10,9 @@ class Chess(object):
     def damage(self):
         pass
 
+    def attack_range(self):
+        pass
+
     def bonuses(self, board_state):
         pass
     
@@ -35,10 +38,20 @@ class Storm1Chess(Chess):
         self.owner = owner
         
     def attack_rate(self):
-        return 2
+        return 1
+
+    def attack_range(self):
+        return 3
 
     def damage(self):
-        return 10
+        damage_dealt = 3
+        
+        crit_roll = random.randint(1,10)
+
+        if crit_roll > 9:
+            damage_dealt = 100
+
+        return damage_dealt
 
     def bonuses(self, board_state):
         return []
@@ -57,14 +70,40 @@ class Sven1Chess(Chess):
     def attack_rate(self):
         return 1
 
+    def attack_range(self):
+        return 1
+
     def damage(self):
-        return 2
+        return random.randint(1,4)
 
     def bonuses(self, board_state):
         return []
 
     def starting_health(self):
-        return 15
+        return 45
+
+    def chess_type(self):
+        return "Sven1"
+
+class Zeus1Chess(Chess):
+    def __init__(self, id, owner):
+        self.id = id
+        self.owner = owner
+
+    def attack_rate(self):
+        return 5
+
+    def damage(self):
+        return 50
+
+    def attack_range(self):
+        return 8
+
+    def bonuses(self, board_state):
+        return []
+
+    def starting_health(self):
+        return 20
 
     def chess_type(self):
         return "Sven1"
