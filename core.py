@@ -116,46 +116,49 @@ class BattleBoard(object):
     def battle(self):
         timer = 1
         while not self.end_condition():
-            effects_queue = []
+
+            chesses_to_act = []
             for player in self.players:
                 for chess in self.chesses_owned[player]:
-                    targets = [ target for target in
-                                self.chesses_positions.get_available_targets(self.chesses_positions.get_piece_location(chess), chess.attack_range())
-                                if target.owner == self.opponent(chess.owner)
-                    ]
-
-                    if len(targets) == 0:
-                        # move thie piece randomly
-                        old_position = self.chesses_positions.get_piece_location(chess)
-                        available_positions = self.chesses_positions.get_available_positions()
-                        if len(available_positions) == 0:
-                            raise Exception("No places for this piece to move!")
-                        
-                        new_position = random.choice(available_positions)
-                        
-                        self.chesses_positions.move_piece(chess, new_position)
-                        print("{} moved from {} to {}".format(chess, old_position, new_position))
+                    chesses_to_act += [chess]
+            random.shuffle(chesses_to_act)
             
-                    else:
-                        if timer % chess.attack_rate() == 0:
-                            target = chess.select_target(targets)
-                            #print("P{} dealing damage to P{}".format(self.chesses_positions.get_piece_location(chess), self.chesses_positions.get_piece_location(target)))
-                            damage = self.calculate_damage(chess, target)
-                            effects_queue += [DamageEffect(chess, target, damage)]
-            
-            effects_queue = self.apply_effect_priority(effects_queue)
+            for chess in chesses_to_act:
+                if not self.piece_is_alive(chess):
+                    continue
+                
+                targets = [ target for target in
+                            self.chesses_positions.get_available_targets(self.chesses_positions.get_piece_location(chess), chess.attack_range())
+                            if target.owner == self.opponent(chess.owner)
+                ]
 
-            self.apply_effects(effects_queue)
+                if len(targets) == 0:
+                    # move thie piece randomly
+                    old_position = self.chesses_positions.get_piece_location(chess)
+                    available_positions = self.chesses_positions.get_available_positions()
+                    if len(available_positions) == 0:
+                        raise Exception("No places for this piece to move!")
+                        
+                    new_position = random.choice(available_positions)
+                        
+                    self.chesses_positions.move_piece(chess, new_position)
+                    print("{} moved from {} to {}".format(chess, old_position, new_position))
+            
+                else:
+                    if timer % chess.attack_rate() == 0:
+                        target = chess.select_target(targets)
+                        damage = self.calculate_damage(chess, target)
+                        effects_queue = [DamageEffect(chess, target, damage)]
+
+                        self.apply_effects(effects_queue)
             
             timer += 1
             print(self.chesses_positions)
+            print(self.print_unit_summary())
             print("-- Round {} Complete --".format(timer))
 
         print("Finished battle!")
         print(self)
-    
-    def apply_effect_priority(self, effects):
-        return random.sample(effects, len(effects))
     
     def apply_effects(self, effects):
         for effect in effects:
@@ -195,6 +198,28 @@ class BattleBoard(object):
 
     def opponent_chesses(self, player):
         return self.chesses_owned[self.opponent(player)]
+
+    def print_unit_summary(self):
+        output = ""
+        for player in self.players:
+            output += "{} units:\n".format(player)
+            for chess in self.chesses_owned[player]:
+                output += "    {}\n".format(self.display_chess_health(chess))
+        return output
+
+    def display_chess_health(self, piece):
+        current_health = self.chesses_health[piece]
+        max_health = piece.starting_health()
+        missing_health = max_health - current_health
+
+        health_display = "[{}{}]".format("■" * current_health, " " * missing_health)
+
+        padding = 25 - len(str(piece))
+        if padding < 0:
+            padding = 0
+        unit_name_display = "{}{}".format(piece, " " * padding)
+        
+        return "{}: {}".format(unit_name_display, health_display)
     
     def __str__(self):
         return str(self.chesses_positions) + str(

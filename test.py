@@ -34,13 +34,17 @@ board1.chesses_owned = {
     player2: []
 }
 
-add_piece(board1, c_zeus(player1), (0,0))
-add_piece(board1, c_zeus(player1), (0,2))
+add_piece(board1, c_zeus(player1), (2,0))
+add_piece(board1, c_zeus(player1), (4,0))
+add_piece(board1, c_storm(player1), (6,0))
 
-add_piece(board1, c_sven(player2), (7,0))
-add_piece(board1, c_sven(player2), (7,1))
-add_piece(board1, c_sven(player2), (7,2))
-add_piece(board1, c_sven(player2), (7,3))
-add_piece(board1, c_sven(player2), (7,4))
+add_piece(board1, c_sven(player2), (0,7))
+add_piece(board1, c_sven(player2), (1,7))
+add_piece(board1, c_sven(player2), (2,7))
+add_piece(board1, c_sven(player2), (3,7))
+add_piece(board1, c_sven(player2), (4,7))
+add_piece(board1, c_storm(player2), (5,7))
+
+print(board1.chesses_positions)
 
 board1.battle()
