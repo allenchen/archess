@@ -8,6 +8,9 @@ class Player(object):
     def __str__(self):
         return "P{}".format(self.id)
 
+    def __hash__(self):
+        return self.id
+
 class GameState(object):
     def __init__(self, id):
         self.players = []
@@ -44,6 +47,9 @@ class GameState(object):
 
     def move_chess(self, player, chess, new_position):
         # y must be <= 3, you can only put units on the first four rows.
+
+        if chess not in self.chess_inventories[player]:
+            raise Exception("This chess isn't in your inventory!")
 
         new_x, new_y = new_position
         if new_y > 3:
@@ -105,8 +111,7 @@ class GameState(object):
             battle_positions
         )
 
-        return battle_board.battle()
-        
+        return battle_board.battle()        
 
 class PurchaseChessEvent(object):
     def __init__(self, player, chess, spend):
