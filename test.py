@@ -26,25 +26,26 @@ def add_piece(board, piece, location):
 player1 = Player(1, "Player 1")
 player2 = Player(2, "Player 2")
 
-board1 = BattleBoard(None)
-board1.players = [player1, player2]
+gs = GameState(1001)
 
-board1.chesses_owned = {
-    player1: [],
-    player2: []
-}
+gs.add_player(player1)
+gs.add_player(player2)
 
-add_piece(board1, c_zeus(player1), (2,0))
-add_piece(board1, c_zeus(player1), (4,0))
-add_piece(board1, c_storm(player1), (5,0))
+gs.modify_gold(player1, 50)
+gs.modify_gold(player2, 50)
 
-add_piece(board1, c_sven(player2), (0,7))
-add_piece(board1, c_sven(player2), (1,7))
-add_piece(board1, c_sven(player2), (2,7))
-add_piece(board1, c_sven(player2), (3,7))
-add_piece(board1, c_sven(player2), (4,7))
-add_piece(board1, c_storm(player2), (5,7))
+z1 = gs.buy_chess(player1, c_zeus(player1))
+gs.move_chess(player1, z1, (1, 0))
+z2 = gs.buy_chess(player1, c_zeus(player1))
+gs.move_chess(player1, z2, (4, 0))
 
-print(board1.chesses_positions)
+s1 = gs.buy_chess(player2, c_sven(player2))
+gs.move_chess(player2, s1, (1,0))
+s2 = gs.buy_chess(player2, c_sven(player2))
+gs.move_chess(player2, s2, (2,0))
+s3 = gs.buy_chess(player2, c_sven(player2))
+gs.move_chess(player2, s3, (3,2))
+s4 = gs.buy_chess(player2, c_sven(player2))
+gs.move_chess(player2, s4, (4,2))
 
-board1.battle()
+gs.battle(player1, player2)

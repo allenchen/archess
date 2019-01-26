@@ -6,7 +6,7 @@ class Player(object):
         self.name = name
 
     def __str__(self):
-        return "Player{}".format(self.id)
+        return "P{}".format(self.id)
 
 class GameState(object):
     def __init__(self, id):
@@ -14,20 +14,117 @@ class GameState(object):
         self.id = id
         self.chess_inventories = {}
         self.gold = {}
-        self.chesses_positions = BoardPositions()
+        self.chesses_positions = {}
 
+    def add_player(self, player):
+        if player in self.players:
+            raise Exception("Player is already in this game!")
+        
+        self.players += [player]
+        self.chess_inventories[player] = []
+        self.gold[player] = 0
+        self.chesses_positions[player] = BoardPositions()
+
+    def modify_gold(self, player, delta):
+        self.gold[player] += delta
+        return self.gold[player]
+        
     def buy_chess(self, player, chess):
-        pass
+        if self.gold[player] < chess.cost():
+            raise Exception("Can't buy this chess because you don't have enough gold!")
+
+        self.gold[player] -= chess.cost()
+
+        self.add_to_inventory(player, chess)
+
+        return chess
     
     def sell_chess(self, player, chess):
         pass
 
     def move_chess(self, player, chess, new_position):
-        pass
+        # y must be <= 3, you can only put units on the first four rows.
+
+        new_x, new_y = new_position
+        if new_y > 3:
+            raise Exception("You can only put units on the first four rows")
+
+        if self.chesses_positions[player].has_location(chess):
+            self.chesses_positions[player].move_piece(chess, new_position)
+        else:
+            self.chesses_positions[player].add_piece(chess, new_position)
 
     def add_to_inventory(self, player, chess):
-        pass
+        self.chess_inventories[player] += [chess]
+
+    def flip_pieces_and_add(self, source_board, delta_board):
+        # adds delta_board to source_board (by creating a new board entirely) by flipping delta_board
+        # over the x axis and adding it
+
+        new_board = BoardPositions()
+        for piece, position in delta_board.reverse_position_lookup.items():
+            # flip location
+            old_x, old_y = position
+            new_position = (old_x, 7 - old_y)
+            new_board.add_piece(piece, new_position)
+
+        for piece, position in source_board.reverse_position_lookup.items():
+            new_board.add_piece(piece, position)
+
+        return new_board
         
+    def battle(self, bottom_player, top_player):
+        # initialize a battle given inventories and positions
+
+        # create a single board
+        battle_positions = self.flip_pieces_and_add(
+            self.chesses_positions[bottom_player],
+            self.chesses_positions[top_player]
+        )
+
+        # find all battle-ready combatants (with a position)
+        bottom_player_chesses = [ chess
+                                  for chess
+                                  in self.chess_inventories[bottom_player]
+                                  if self.chesses_positions[bottom_player].has_location(chess) ]
+
+        top_player_chesses = [ chess
+                               for chess
+                               in self.chess_inventories[top_player]
+                               if self.chesses_positions[top_player].has_location(chess) ]
+
+        starting_chess_health = {
+            chess: chess.starting_health() for chess in bottom_player_chesses + top_player_chesses
+        }
+        
+        battle_board = BattleBoard(
+            [bottom_player, top_player],
+            { bottom_player: bottom_player_chesses,
+              top_player: top_player_chesses },
+            starting_chess_health,
+            battle_positions
+        )
+
+        return battle_board.battle()
+        
+
+class PurchaseChessEvent(object):
+    def __init__(self, player, chess, spend):
+        self.player = player
+        self.chess = chess
+        self.spend = spend
+
+    def __str__(self):
+        return "{} bought a {} for {} gold.".format(player, chess, spend)
+
+class InitiateBattleEvent(object):
+    def __init__(self, p1board, p2board):
+        self.p1board = p1board
+        self.p2board = p2board
+
+    def __str__(self):
+        return "A battle was initiated!"
+
 class DamageEffect(object):
     def __init__(self, source, target, amount):
         self.source = source
@@ -93,15 +190,15 @@ class BoardPositions(object):
     def get_piece_location(self, piece):
         return self.reverse_position_lookup[piece]
 
+    def has_location(self, piece):
+        return piece in self.reverse_position_lookup
+
     def get_available_targets(self, position, attack_range):
         piece_x, piece_y = position
 
-        # add one because it's an exclusive range, and I don't remember and I don't have internet
-        # connection to find out what's the inclusive range syntax
+        # add one because it's an exclusive range at the end
         x_range = range(max(0, piece_x - attack_range), min(8, piece_x + attack_range + 1))
         y_range = range(max(0, piece_y - attack_range), min(8, piece_y + attack_range + 1))
-
-        #print("Looking for ({}, {})".format(x_range, y_range))
         
         available_targets = []
         
@@ -143,12 +240,11 @@ class BoardPositions(object):
         return output
 
 class BattleBoard(object):
-    def __init__(self, board_state):
-        if board_state is None:
-            self.players = []
-            self.chesses_owned = {}
-            self.chesses_health = {}
-            self.chesses_positions = BoardPositions()
+    def __init__(self, players, chesses_owned, chesses_health, chesses_positions):
+        self.players = players
+        self.chesses_owned = chesses_owned
+        self.chesses_health = chesses_health
+        self.chesses_positions = chesses_positions
 
     def battle(self):
         timer = 1
